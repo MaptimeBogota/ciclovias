@@ -178,7 +178,7 @@ EOF
   
   # Elimina la línea de fecha de OSM
   sed -i'' -e '/"timestamp_osm_base":/d' "giro-${ID}.json"
-  rm "giro-${ID}.json-e"
+  rm -f "giro-${ID}.json-e"
  
   # Procesa el archivo descargado.
   if [ -r "${HISTORIC_FILES_DIR}/giro-${ID}.json" ] ; then
