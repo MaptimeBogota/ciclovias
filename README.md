@@ -7,3 +7,4 @@ Usa overpass para traer las relaciones de los segmentos de vías y las restricci
 Después compara los datos recuperados con una versión previamente guardada en git.
 Si encuentra diferencias envía un reporte a algunas personas por medio de mail.
 
+Este repositorio hace parte del proyecto de mapeo de ciclovías en OSM: https://wiki.openstreetmap.org/wiki/Colombia/Project-Ciclov%C3%ADas
