@@ -216,6 +216,8 @@ if [ -f "${REPORT_CONTENT}" ] ; then
  cat "${REPORT_CONTENT}" >> ${REPORT}
  echo >> ${REPORT}
  echo "Hora de fin: $(date)" >> ${REPORT}
+ echo >> ${REPORT}
+ echo "Este reporte fue creado por medio de el script verificador: https://github.com/MaptimeBogota/ciclovias" >> ${REPORT}
  sendmail -vt < ${REPORT}
 fi
 
