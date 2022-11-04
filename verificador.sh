@@ -19,7 +19,9 @@ RESTRICTIONS_IDS=restricciones_ids.txt
 WAIT_TIME=5
 REPORT=report.txt
 REPORT_CONTENT=reportContent.txt
-MAILS=angoca@yahoo.com,civil.melo@gmail.com
+MAILS="angoca@yahoo.com,civil.melo@gmail.com"
+
+echo "$(date) Starting process" >> ${LOG_FILE}
 
 # Chequea prerequisitos.
 ## git
@@ -45,11 +47,10 @@ cd - > /dev/null
 rm -f ${REPORT_CONTENT}
 
 cat << EOF > ${REPORT}
-To: ${MAILS}
 Subject: Detección de diferencias en ciclovías de Bogotá
-From: bot@maptimeBogota.com
+From: botCicloviaMaptimeBogota@osm-test
 
-Reporte de modificaciones en ciclovías en OpenStreetMap.
+Reporte de modificaciones en ciclovías de Bogotá en OpenStreetMap.
 
 Hora de inicio: $(date).
 
@@ -78,6 +79,7 @@ EOF
 echo "Procesando segmentos de ciclovías..."
 while read -r ID ; do
  echo "Procesando relación con id ${ID}."
+ echo "Procesando relación con id ${ID}." >> ${LOG_FILE}
 
  # Define el query Overpass para un id específico de ciclovía.
  cat << EOF > ${QUERY_FILE}
@@ -86,6 +88,7 @@ rel(${ID});
 (._;>;);
 out; 
 EOF
+ cat ${QUERY_FILE} >> ${LOG_FILE}
 
  # Obtiene la geometría de un id específico de ciclovía.
  set +e
@@ -94,7 +97,7 @@ EOF
  RET=${?}
  set -e
  if [ ${RET} -ne 0 ] ; then
-  echo "WARN: Falló la descarga de una relación."
+  echo "WARN: Falló la descarga de la relación ${ID}."
   continue
  fi
  
@@ -148,7 +151,6 @@ RET=${?}
 set -e
 if [ ${RET} -ne 0 ] ; then
  echo "ERROR: Falló la descarga de los ids."
- continue
 
 else
  tail -n +2 "${RESTRICTIONS_IDS}" > "${RESTRICTIONS_IDS}.tmp" ; mv "${RESTRICTIONS_IDS}.tmp" "${RESTRICTIONS_IDS}"
@@ -156,6 +158,7 @@ else
  # Procesando restricciones.
  while read -r ID ; do
   echo "Procesando relación con id ${ID}." 
+  echo "Procesando relación con id ${ID}." >> "${LOG_FILE}"
 
   # Define el query Overpass para un id específico de restricción de giro.
   cat << EOF > "${QUERY_FILE}"
@@ -164,16 +167,16 @@ rel(${ID});
 (._;>;);
 out; 
 EOF
+  cat "${QUERY_FILE}" >> "${LOG_FILE}"
 
- # Obtiene la geometría de un id específico de restricción de giro.
- set +e
- wget -O "giro-${ID}.json" --post-file="${QUERY_FILE}" "https://overpass-api.de/api/interpreter" >> "${LOG_FILE}" 2>&1
-
- RET=${?}
- set -e
- if [ ${RET} -ne 0 ] ; then
-  echo "WARN: Falló la descarga de una relación."
-  continue
+  # Obtiene la geometría de un id específico de restricción de giro.
+  set +e
+  wget -O "giro-${ID}.json" --post-file="${QUERY_FILE}" "https://overpass-api.de/api/interpreter" >> "${LOG_FILE}" 2>&1
+  RET=${?}
+  set -e
+  if [ ${RET} -ne 0 ] ; then
+   echo "WARN: Falló la descarga de la relación ${ID}."
+   continue
   fi
   
   # Elimina la línea de fecha de OSM
@@ -213,14 +216,18 @@ EOF
 fi
 
 if [ -f "${REPORT_CONTENT}" ] ; then
+ echo "$(date) Sending mail" >> ${LOG_FILE}
  cat "${REPORT_CONTENT}" >> ${REPORT}
  echo >> ${REPORT}
  echo "Hora de fin: $(date)" >> ${REPORT}
  echo >> ${REPORT}
  echo "Este reporte fue creado por medio de el script verificador: https://github.com/MaptimeBogota/ciclovias" >> ${REPORT}
- sendmail -vt < ${REPORT}
+ sendmail -v "${MAILS}" < ${REPORT}
 fi
 
 # Borra archivos temporales
 rm -f "${QUERY_FILE}" "${CICLOVIA_IDS}" "${RESTRICTIONS_IDS}" "${REPORT}"
+
+echo "$(date) Finishing process" >> ${LOG_FILE}
+echo "$(date) =================" >> ${LOG_FILE}
 
