@@ -4,7 +4,7 @@
 # versión anterior. Esto para identificar cambios dañinos.
 #
 # Autor: Andrés Gómez - AngocA
-# Version: 20221103
+# Version: 20221105
 
 set -euo pipefail
 
@@ -19,6 +19,7 @@ RESTRICTIONS_IDS=restricciones_ids.txt
 WAIT_TIME=5
 REPORT=report.txt
 REPORT_CONTENT=reportContent.txt
+DIFF_FILE=reportDiff.txt
 MAILS="angoca@yahoo.com,civil.melo@gmail.com"
 
 echo "$(date) Starting process" >> ${LOG_FILE}
@@ -36,6 +37,12 @@ if [ ${?} -ne 0 ] ; then
  echo "ERROR: Falta instalar wget."
  exit 1
 fi
+## mutt
+mutt -v > /dev/null 2>&1
+if [ ${?} -ne 0 ] ; then
+ echo "ERROR: Falta instalar mutt como cliente para enviar mensajes."
+ exit 1
+fi
 
 # Prepara el entorno.
 mkdir -p ${HISTORIC_FILES_DIR} > /dev/null
@@ -44,12 +51,13 @@ git init >> ../${LOG_FILE} 2>&1
 git config user.email "maptime.bogota@gmail.com"
 git config user.name "Bot Chequeo ciclovias"
 cd - > /dev/null
-rm -f ${REPORT_CONTENT}
+if [ -f ${REPORT_CONTENT} ] ; then
+ mv ${REPORT_CONTENT} ${REPORT_CONTENT}-$(date +%Y%m%d-%H%M)
+fi
+rm -f ${DIFF_FILE}
+touch ${DIFF_FILE}
 
 cat << EOF > ${REPORT}
-Subject: Detección de diferencias en ciclovías de Bogotá
-From: botCicloviaMaptimeBogota@osm-test
-
 Reporte de modificaciones en ciclovías de Bogotá en OpenStreetMap.
 
 Hora de inicio: $(date).
@@ -108,14 +116,15 @@ EOF
  # Procesa el archivo descargado.
  if [ -r "${HISTORIC_FILES_DIR}/ciclovia-${ID}.json" ] ; then
   # Si hay un archivo histórico, lo compara con ese para ver diferencias.
+  echo ciclovia-${ID}.json >> ${DIFF_FILE}
   set +e
-  diff "${HISTORIC_FILES_DIR}/ciclovia-${ID}.json" "ciclovia-${ID}.json"
+  diff "${HISTORIC_FILES_DIR}/ciclovia-${ID}.json" "ciclovia-${ID}.json" >> ${DIFF_FILE}
   RET=${?}
   set -e
   if [ ${RET} -ne 0 ] ; then
    mv "ciclovia-${ID}.json" "${HISTORIC_FILES_DIR}/"
    cd "${HISTORIC_FILES_DIR}/"
-   git commit "ciclovia-${ID}.json" -m "Nueva versión de ciclovía ${ID}."
+   git commit "ciclovia-${ID}.json" -m "Nueva versión de ciclovía ${ID}." >> "../${LOG_FILE}" 2>&1
    cd - > /dev/null
    echo "* Revisar https://osm.org/relation/${ID}" >> ${REPORT_CONTENT}
   else
@@ -186,14 +195,15 @@ EOF
   # Procesa el archivo descargado.
   if [ -r "${HISTORIC_FILES_DIR}/giro-${ID}.json" ] ; then
    # Si hay un archivo histórico, lo compara con ese para ver diferencias.
+   echo "giro-${ID}.json" >> ${DIFF_FILE}
    set +e
-   diff "${HISTORIC_FILES_DIR}/giro-${ID}.json" "giro-${ID}.json"
+   diff "${HISTORIC_FILES_DIR}/giro-${ID}.json" "giro-${ID}.json" >> ${DIFF_FILE}
    RET=${?}
    set -e
    if [ ${RET} -ne 0 ] ; then
     mv "giro-${ID}.json" "${HISTORIC_FILES_DIR}/"
     cd "${HISTORIC_FILES_DIR}/"
-    git commit "giro-${ID}.json" -m "Nueva versión de giro ${ID}."
+    git commit "giro-${ID}.json" -m "Nueva versión de giro ${ID}." >> "../${LOG_FILE}" 2>&1
     cd - > /dev/null
     echo "* Revisar https://osm.org/relation/${ID}" >> ${REPORT_CONTENT}
    else
@@ -222,7 +232,7 @@ if [ -f "${REPORT_CONTENT}" ] ; then
  echo "Hora de fin: $(date)" >> ${REPORT}
  echo >> ${REPORT}
  echo "Este reporte fue creado por medio de el script verificador: https://github.com/MaptimeBogota/ciclovias" >> ${REPORT}
- sendmail -v "${MAILS}" < ${REPORT}
+ echo "" | mutt -s "Detección de diferencias en ciclovías de Bogotá" -i "${REPORT}" -a "${DIFF_FILE}" -- "${MAILS}" >> ${LOG_FILE}
 fi
 
 # Borra archivos temporales
