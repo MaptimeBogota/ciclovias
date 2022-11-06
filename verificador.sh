@@ -24,6 +24,10 @@ MAILS="angoca@yahoo.com,civil.melo@gmail.com"
 
 echo "$(date) Starting process" >> ${LOG_FILE}
 
+if [ -f ${LOG_FILE} ] ; then
+ mv ${LOG_FILE} ${LOG_FILE}-$(date +%Y%m%d-%H%M)
+fi
+
 # Chequea prerequisitos.
 ## git
 git --version > /dev/null 2>&1
