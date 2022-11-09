@@ -4,7 +4,7 @@
 # versión anterior. Esto para identificar cambios dañinos.
 #
 # Autor: Andrés Gómez - AngocA
-# Version: 20221105
+# Version: 20221103
 
 set -euo pipefail
 
@@ -88,9 +88,9 @@ cat << EOF > ${CICLOVIA_IDS}
 EOF
 
 # Itera sobre cada relación de ciclovía, verificando si han habido cambios.
-echo "Procesando segmentos de ciclovías..."
+echo "Procesando segmentos de ciclovías..." >> ${LOG_FILE}
 while read -r ID ; do
- echo "Procesando relación con id ${ID}."
+ # echo "Procesando relación con id ${ID}."
  echo "Procesando relación con id ${ID}." >> ${LOG_FILE}
 
  # Define el query Overpass para un id específico de ciclovía.
@@ -110,6 +110,7 @@ EOF
  set -e
  if [ ${RET} -ne 0 ] ; then
   echo "WARN: Falló la descarga de la relación ${ID}."
+  echo "WARN: Falló la descarga de la relación ${ID}." >> "${LOG_FILE}"
   continue
  fi
  
@@ -144,13 +145,13 @@ EOF
  fi
 
  # Espera entre requests para evitar errores.
- echo "Esperando ${WAIT_TIME} segundos entre requests..."
+ # echo "Esperando ${WAIT_TIME} segundos entre requests..."
  sleep ${WAIT_TIME}
 
 done < ${CICLOVIA_IDS}
 
 # Itera sobre cada restricción de ciclovía.
-echo "Obtiene los ids de las restricciones"
+echo "Obtiene los ids de las restricciones" >> "${LOG_FILE}"
 cat << EOF > "${QUERY_FILE}"
 [out:csv(::id)];
 (
@@ -164,13 +165,14 @@ RET=${?}
 set -e
 if [ ${RET} -ne 0 ] ; then
  echo "ERROR: Falló la descarga de los ids."
+ echo "ERROR: Falló la descarga de los ids." >> "${LOG_FILE}"
 
 else
  tail -n +2 "${RESTRICTIONS_IDS}" > "${RESTRICTIONS_IDS}.tmp" ; mv "${RESTRICTIONS_IDS}.tmp" "${RESTRICTIONS_IDS}"
 
  # Procesando restricciones.
  while read -r ID ; do
-  echo "Procesando relación con id ${ID}." 
+  # echo "Procesando relación con id ${ID}." 
   echo "Procesando relación con id ${ID}." >> "${LOG_FILE}"
 
   # Define el query Overpass para un id específico de restricción de giro.
@@ -189,6 +191,7 @@ EOF
   set -e
   if [ ${RET} -ne 0 ] ; then
    echo "WARN: Falló la descarga de la relación ${ID}."
+   echo "WARN: Falló la descarga de la relación ${ID}." >> "${LOG_FILE}"
    continue
   fi
   
@@ -223,7 +226,7 @@ EOF
   fi
  
   # Espera entre requests para evitar errores.
-  echo "Esperando ${WAIT_TIME} segundos entre requests..."
+  # echo "Esperando ${WAIT_TIME} segundos entre requests..."
   sleep ${WAIT_TIME}
  
  done < "${RESTRICTIONS_IDS}"
@@ -244,4 +247,5 @@ rm -f "${QUERY_FILE}" "${CICLOVIA_IDS}" "${RESTRICTIONS_IDS}" "${REPORT}"
 
 echo "$(date) Finishing process" >> ${LOG_FILE}
 echo "$(date) =================" >> ${LOG_FILE}
+
 
