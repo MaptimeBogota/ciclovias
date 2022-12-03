@@ -8,3 +8,9 @@ Después compara los datos recuperados con una versión previamente guardada en 
 Si encuentra diferencias envía un reporte a algunas personas por medio de mail.
 
 Este repositorio hace parte del proyecto de mapeo de ciclovías en OSM: https://wiki.openstreetmap.org/wiki/Colombia/Project-Ciclov%C3%ADas
+
+## Instalación en Ubuntu
+
+```
+sudo apt -y install mutt
+```
