@@ -29,6 +29,7 @@ if [ -f ${LOG_FILE} ] ; then
 fi
 
 # Chequea prerequisitos.
+set +e
 ## git
 git --version > /dev/null 2>&1
 if [ ${?} -ne 0 ] ; then
@@ -47,6 +48,7 @@ if [ ${?} -ne 0 ] ; then
  echo "ERROR: Falta instalar mutt como cliente para enviar mensajes."
  exit 1
 fi
+set -e
 
 # Prepara el entorno.
 mkdir -p ${HISTORIC_FILES_DIR} > /dev/null
