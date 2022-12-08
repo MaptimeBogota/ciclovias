@@ -14,7 +14,11 @@ Este repositorio hace parte del proyecto de mapeo de ciclovías en OSM: https://
 ```
 sudo apt -y install mutt
 sudo apt -y install sendmail
+sudo apt -y install postfix
 ```
+
+Poner el FQDN 127.0.0.1 localhost.localdomain
+
 
 ###  Programación desde cron
 
