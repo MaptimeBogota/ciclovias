@@ -28,10 +28,10 @@ Para esto hay que generar un password desde Gmail.
 ```
 
 # Corre el verificador de ciclovias todos los dias.
-0 2 * * * cd ciclovia ; ./verificador.sh
+0 2 * * * cd ~/ciclovias ; ./verificador.sh
 
 # Borra logs viejos de la ciclovia.
-0 0 * * * find ~/ciclovia/ -maxdepth 1 -type f -name "*.log*" -mtime +15 -exec rm {} \;
-0 0 * * * find ~/ciclovia/ -maxdepth 1 -type f -name "*.json" -mtime +15 -exec rm {} \;
-0 0 * * * find ~/ciclovia/ -maxdepth 1 -type f -name "*.txt*" -mtime +15 -exec rm {} \;
+0 0 * * * find ~/ciclovias/ -maxdepth 1 -type f -name "*.log*" -mtime +15 -exec rm {} \;
+0 0 * * * find ~/ciclovias/ -maxdepth 1 -type f -name "*.json" -mtime +15 -exec rm {} \;
+0 0 * * * find ~/ciclovias/ -maxdepth 1 -type f -name "*.txt*" -mtime +15 -exec rm {} \;
 ```
