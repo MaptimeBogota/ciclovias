@@ -20,7 +20,7 @@ WAIT_TIME=5
 REPORT=report.txt
 REPORT_CONTENT=reportContent.txt
 DIFF_FILE=reportDiff.txt
-MAILS="angoca@yahoo.com,civil.melo@gmail.com"
+MAILS="angoca@yahoo.com,civil.melo@gmail.com,fabio_calderon@outlook.com"
 
 echo "$(date) Starting process" >> ${LOG_FILE}
 
