@@ -1,4 +1,7 @@
 # Ciclovías
+
+**Nota:** Este proyecto fue reemplazado por https://github.com/MaptimeBogota/OSM-elements-change-tracker
+
 Mecanismo para controlar la calidad de la ciclovía.
 Las ciclovías se componen de segmentos de vías y de restricciones de giro.
 
